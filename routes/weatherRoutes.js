@@ -3,19 +3,26 @@ const router = express.Router();
 const weatherController = require('../controllers/weatherController');
 
 router.get('/weather/:city', async (req, res) => {
-    const city = req.params.city;
-    const weatherData = await getWeatherByCity(city);
+    try {
+        const city = req.params.city;
+        const weatherData = await weatherController.getWeatherByCity(city);
 
+        if (weatherData.error) {
+            return res.status(500).json({ error: weatherData.error });
+        }
 
-    if (weatherData) {
         res.json({
-            city: city,
+            city: weatherData.city,
+            country: weatherData.country,
             temperature: weatherData.temperature,
             humidity: weatherData.humidity,
-            description: weatherData.description,
+            wind_speed: weatherData.wind_speed,
+            weather_description: weatherData.weather_description,
+            pressure: weatherData.pressure,
+            observation_time: weatherData.observation_time
         });
-    } else {
-        res.status(500).json({ error: 'Weather data could not be fetched.' });
+    } catch (error) {
+        res.status(500).json({ error: "An internal server error occurred." });
     }
 });
 
